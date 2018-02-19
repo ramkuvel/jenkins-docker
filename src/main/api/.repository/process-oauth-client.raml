@@ -1,0 +1,47 @@
+#%RAML 1.0
+title: OAuth Client Sample
+version: v1.0
+baseUri: http://0.0.0.0:19401/dumyclient/v1.0/api
+mediaType: application/json
+
+traits:
+  compliant:
+    description: This trait defines a set of common response codes for error handling.
+    responses:
+      400: # Bad Request
+        description: |
+          The request cannot be performed due to a malformed request syntax, and invalid request message, or an invalid request header.
+      401: # Unauthorised
+        description: |
+          Specifically for use when authentication is required and has failed or has not yet been provided.
+      403: # Forbidden
+        description: |
+          A previously authenticated user is not authorised to perform this operation.
+          This applies to the caller itself (*NOT* the end-user) to limitate what a calling application can do.
+      404: # Not Found
+        description: |
+          No resource exists for the requested URI.
+      405: # Method Not Allowed
+        description: |
+          The request method is known by the server but has been disabled and cannot be used by this URI.
+      409: # Conflict
+        description: |
+          Request conflict with current state of server.
+      500: # Internal Server Error
+        description: |
+          The gateway currently experiences some technical issues and necessitates administration operation.
+      503: # Service Unavailable
+        description: |
+          The request couldn't be completed successfully because of an error in a downstream system.
+      504: # System Under Maintenance
+        description: |
+          The gateway or an underlying system is currently under maintenance and is unavailable.
+/requestResource:
+  get:
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: |
+              [{"name":"ate1"},
+               {"name":"ate2"}]

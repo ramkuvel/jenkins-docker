@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:optus-logger-module="http://www.mulesoft.org/schema/mule/optus-logger-module" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-platform-gw="http://www.mulesoft.org/schema/mule/api-platform-gw" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:context="http://www.springframework.org/schema/context" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.mulesoft.org/schema/mule/api-platform-gw http://www.mulesoft.org/schema/mule/api-platform-gw/current/mule-api-platform-gw.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/optus-logger-module http://www.mulesoft.org/schema/mule/optus-logger-module/current/mule-optus-logger-module.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+    <http:listener-config name="process-oauth-client-httpListenerConfig" host="0.0.0.0" port="${http.port}" basePath="${http.basePath}" doc:name="HTTP Listener Configuration"/>
+    <apikit:config name="process-oauth-client-config" raml="process-oauth-client.raml" consoleEnabled="false" doc:name="Router"/>
+    <api-platform-gw:api apiName="OAuth Client Sample (SAMPLE) [${mule.env}]" version="1.0" flowRef="process-oauth-client-main" create="true" apikitRef="process-oauth-client-config" doc:name="API Autodiscovery" />
+    <context:property-placeholder location="properties/${mule.env}.properties" />
+    <tls:context name="tls.context.oauth" doc:name="TLS Context">    
+      <tls:trust-store path="${truststore.path}"
+                     password="${truststore.password}"
+                    />  
+    </tls:context>  
+    
+   <!--  <http:request-config 
+    	name="HTTPS_Request_OAuth_Provider_Configuration" 
+    	protocol="HTTPS"
+    	host="${oauth.provider.host}" 
+    	port="${oauth.provider.port}"
+    	enableCookies="true" 
+    	doc:name="HTTP Request Configuration"
+    	tlsContext-ref="tls.context.oauth"
+    	basePath="${oauth.provider.base.path}"/> -->
+    	
+    	 <http:request-config 
+    	name="HTTPS_Request_OAuth_Provider_Configuration" 
+    
+    	host="${oauth.provider.host}" 
+    	port="${oauth.provider.port}"
+    	enableCookies="true" 
+    	doc:name="HTTP Request Configuration"
+    	
+    	basePath="${oauth.provider.base.path}"/>
+    
+<!--     <http:request-config name="HTTPS_Request_Resource_Configuration" 
+    		host="${resource.owner.host}" 
+    		port="${resource.owner.port}" 
+    		
+    		enableCookies="true" 
+    		doc:name="HTTP Request Configuration"
+    		basePath="${resource.owner.base.path}"
+    		tlsContext-ref="tls.context.oauth"
+    		protocol="HTTPS"/> -->
+		<http:request-config name="HTTPS_Request_Resource_Configuration" 
+    		host="${resource.owner.host}" 
+    		port="${resource.owner.port}" 
+    		
+    		enableCookies="true" 
+    		doc:name="HTTP Request Configuration"
+    		basePath="${resource.owner.base.path}"/>
+    		
+
+<!--    	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy"	
+			keyGenerationExpression="#[flowVars.key]" >
+        <in-memory-store name="TEST" maxEntries="1000" entryTTL="20000" expirationInterval="20000"/>
+	</ee:object-store-caching-strategy> -->
+
+    
+    	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy"	
+				keyGenerationExpression="#[flowVars.key]" maxEntries="100" synchronized="true" entryTTL="5000">
+        <custom-object-store class="au.com.optus.mule.RedisStore"/>
+		</ee:object-store-caching-strategy>
+	
+    
+    <flow name="process-oauth-client-main">
+        <http:listener config-ref="process-oauth-client-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
+        <apikit:router config-ref="process-oauth-client-config" doc:name="APIkit Router"/>
+        <exception-strategy ref="process-oauth-client-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
+    </flow>
+    <!--  <flow name="process-oauth-client-console">
+        <http:listener config-ref="process-oauth-client-httpListenerConfig" path="/console/*" doc:name="HTTP"/>
+        <apikit:console config-ref="process-oauth-client-config" doc:name="APIkit Console"/>
+    </flow>  -->
+   <!--  <flow name="get:/requestResource:process-oauth-client-config">
+        <optus-logger-module:logger message="&quot;Enter get:/requestResource:process-oauth-client-config #[message]&quot;" type="ENTRY" logPayload="true" doc:name="Log Entry"/>
+        <set-payload value="grant_type=client_credentials&amp;client_id=8051ce22d9c44bbbb56b2052feb079c2&amp;client_secret=F282558f05714e5188D8d7E446e862ba&amp;scope=READ" doc:name="Set Payload"/>
+        <optus-logger-module:logger message="Before calling provider"  logPayload="true" doc:name="Log Before Call"/>
+        <http:request config-ref="HTTPS_Request_OAuth_Provider_Configuration" path="${oauth.provider.path}" method="GET" doc:name="tokens">
+            <http:request-builder>
+                <http:query-param paramName="grant_type" value="client_credentials"/>
+                <http:query-param paramName="client_id" value="8051ce22d9c44bbbb56b2052feb079c2"/>
+                <http:query-param paramName="client_secret" value="F282558f05714e5188D8d7E446e862ba"/>
+                <http:query-param paramName="scope" value="READ"/>
+            </http:request-builder>
+        </http:request>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <set-variable variableName="accessToken" value="#[payload.access_token]" doc:name="Variable"/>
+        <optus-logger-module:logger message="&quot;Log Before Retrieving Resource, accessToken=$[flowVars.accessToken]&quot;" logPayload="true" doc:name="Log Before Retrieving Resource"/>
+        <http:request config-ref="HTTPS_Request_Resource_Configuration" path="${resource.owner.path}" method="GET" doc:name="Retrieve Resources">
+            <http:request-builder>
+                <http:query-param paramName="access_token" value="#[flowVars.accessToken]"/>
+            </http:request-builder>
+        </http:request>
+        <optus-logger-module:logger message="&quot;Exit get:/requestResource:process-oauth-client-config&quot;" type="EXIT" logPayload="true" doc:name="Log Exit"/>
+    </flow> -->
+    
+     <flow name="get:/requestResource:process-oauth-client-config">
+        <optus-logger-module:logger message="&quot;Enter get:/requestResource:process-oauth-client-config #[message]&quot;" type="ENTRY" logPayload="true" doc:name="Log Entry"/>
+        <optus-logger-module:logger message="Before calling provider"  logPayload="true" doc:name="Log Before Call"/>
+        
+        
+        
+        <flow-ref name="OAuthCache" doc:name="OAuthCache"/>
+        <logger message="post cache ====#[payload.class]=====#[payload[0].access_token]" level="INFO" doc:name="Logger"/>
+
+
+       <!--  <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+
+{
+	access_token : payload[0].access_token
+}]]></dw:set-payload>
+        </dw:transform-message> -->
+        <set-variable variableName="accessToken" value="#[payload[0].access_token]" doc:name="Variable"/>
+        
+         <logger message="===accessToken====#[payload[0].access_token]" level="INFO" doc:name="Logger"/>
+         
+        <optus-logger-module:logger message="&quot;Log Before Retrieving Resource, accessToken=#[flowVars.accessToken]&quot;" logPayload="true" doc:name="Log Before Retrieving Resource"/>
+        <http:request config-ref="HTTPS_Request_Resource_Configuration" path="${resource.owner.path}" method="GET" doc:name="Retrieve Resources">
+            <http:request-builder>
+                <http:query-param paramName="access_token" value="#[flowVars.accessToken]"/>
+            </http:request-builder>
+        </http:request>
+        <optus-logger-module:logger message="&quot;Exit get:/requestResource:process-oauth-client-config&quot;" type="EXIT" logPayload="true" doc:name="Log Exit"/>
+    </flow>
+
+	
+    <flow name="OAuthCache">
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	grant_type: "client_credentials",
+	client_id: "8051ce22d9c44bbbb56b2052feb079c2",
+	client_secret: "F282558f05714e5188D8d7E446e862ba",
+	scope: "READ"
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-variable variableName="key" value="#[payload.client_id]" doc:name="Variable"/>
+    	
+     	<ee:cache cachingStrategy-ref="Caching_Strategy" doc:name="Cache" >
+     	
+            <http:request config-ref="HTTPS_Request_OAuth_Provider_Configuration" path="${oauth.provider.path}" method="GET" doc:name="tokens">
+                <http:request-builder>
+                    <http:query-param paramName="grant_type" value="client_credentials"/>
+                    <http:query-param paramName="client_id" value="8051ce22d9c44bbbb56b2052feb079c2"/>
+                    <http:query-param paramName="client_secret" value="F282558f05714e5188D8d7E446e862ba"/>
+                    <http:query-param paramName="scope" value="READ"/>
+                </http:request-builder>
+            </http:request>
+            <byte-array-to-object-transformer doc:name="Byte Array to Object"/>
+            <json:json-to-object-transformer returnClass="java.util.Map" doc:name="JSON to Object"/>
+            <scripting:component doc:name="Groovy">
+                <scripting:script engine="Groovy"><![CDATA[def data = []
+
+data << payload;
+]]></scripting:script>
+            </scripting:component>
+            <logger message="response auth provider=====#[payload]====#[payload[0].access_token]" level="INFO" doc:name="Logger"/>
+            <logger message="===Cache====#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger"/>
+           <!--  <dw:transform-message doc:name="Transform Message">
+                <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+
+{
+	access_token : payload[0].access_token
+}]]></dw:set-payload>
+            </dw:transform-message> -->
+        
+     </ee:cache>
+        <logger message="===OAuthCache End====#[payload]" level="INFO" doc:name="Logger"/>
+     </flow>
+
+</mule>
