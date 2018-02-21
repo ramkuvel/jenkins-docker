@@ -17,7 +17,11 @@ node {
 	      echo "Groovy Test fileName : " + variables.fileName
 	     
 	     echo "Groovy Test data : " + variables.data()
-     }	
+     }
+     stage('stashFiles') {
+	stash name: "targetFiles", includes : "Dockerfile, groovy/*.groovy, target/*.zip"
+    }
+	
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
