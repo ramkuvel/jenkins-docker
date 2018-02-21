@@ -1,4 +1,4 @@
-name='nameTest'
+name.test.test1='nameTest'
 
 
 code='111111111111'
