@@ -6,7 +6,7 @@ node {
 
         checkout scm
     }
-     stage('Build image') {
+     stage('Groovy Test') {
 	def variables = load("test.groovy")
 	     echo "Groovy Test : " + variables.name
      }	
