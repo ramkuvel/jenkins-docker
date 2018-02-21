@@ -7,7 +7,7 @@ node {
         checkout scm
     }
      stage('Groovy Test') {
-	def variables = load "test.groovy"
+	def variables = load "groovy/test.groovy"
 	     
 	     echo "Groovy variables : " + variables
 	     
