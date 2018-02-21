@@ -8,6 +8,8 @@ node {
     }
      stage('Groovy Test') {
 	def variables = load("test.groovy")
+	     
+	     echo "Groovy variables : " + variables
 	     echo "Groovy Test : " + variables.name
      }	
     stage('Build image') {
