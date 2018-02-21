@@ -6,7 +6,10 @@ node {
 
         checkout scm
     }
-
+     stage('Build image') {
+	def variables = load("test.groovy")
+	     echo "Groovy Test : " + variables.name
+     }	
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
