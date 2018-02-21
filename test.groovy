@@ -1,1 +1,1 @@
-def name = test
+def name='test'
