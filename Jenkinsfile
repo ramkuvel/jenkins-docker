@@ -11,7 +11,7 @@ node {
 	     
 	     echo "Groovy variables : " + variables
 	     
-	     def myName = variables.name.test.test1
+	     def myName = variables.name.test
 	     echo "Groovy Test myName : " + myName
 	     
 	      echo "Groovy Test code : " + variables.code
