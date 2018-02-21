@@ -22,6 +22,10 @@ node {
 	stash name: "targetFiles", includes : "Dockerfile, groovy/*.groovy, target/*.zip"
     }
 	
+ stage('UnstashFiles') {
+	unstash name: "targetFiles"
+    }	
+	
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
