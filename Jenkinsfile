@@ -10,7 +10,10 @@ node {
 	def variables = load "test.groovy"
 	     
 	     echo "Groovy variables : " + variables
-	     echo "Groovy Test name : " + variables.name
+	     
+	     def myName = variables.name
+	     echo "Groovy Test myName : " + myName
+	     
 	      echo "Groovy Test code : " + variables.code
 	     
 	     echo "Groovy Test data : " + variables.data()
