@@ -1,7 +1,6 @@
 name.test='nameTest'
-
-
-code='111111111111'
+fileName=file-name-test
+runTime=1.1.1
 
 
 def data(){ 
