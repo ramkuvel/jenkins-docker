@@ -1,8 +1,8 @@
-def name='nameTest'
-return name;
+name='nameTest'
 
-def code='111111111111'
-return code;
+
+code='111111111111'
+
 
 def data(){ 
   
