@@ -10,7 +10,9 @@ node {
 	def variables = load "test.groovy"
 	     
 	     echo "Groovy variables : " + variables
-	     echo "Groovy Test : " + variables.data().name
+	     echo "Groovy Test : " + variables.$name
+	     
+	     echo "Groovy Test data : " + variables.data()
      }	
     stage('Build image') {
         /* This builds the actual image; synonymous to
