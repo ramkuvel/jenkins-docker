@@ -11,10 +11,10 @@ node {
 	     
 	     echo "Groovy variables : " + variables
 	     
-	     def myName = variables.name.test
-	     echo "Groovy Test myName : " + myName
+	     def myName = variables.runTime
+	     echo "Groovy Test runTime : " + myName
 	     
-	      echo "Groovy Test code : " + variables.code
+	      echo "Groovy Test fileName : " + variables.fileName
 	     
 	     echo "Groovy Test data : " + variables.data()
      }	
